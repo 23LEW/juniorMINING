@@ -1,6 +1,9 @@
 -- Junior-Mining Erfolgs-Datenbank
--- Schema-Version: 1.0
--- Erstellt: 2026-05-14
+-- Schema-Version: 1.1
+-- Erstellt: 2026-05-14 (v1.0)
+-- Geaendert: 2026-05-14 (v1.1: role_type um 'Project Geologist' erweitert;
+--                              Migrationsskript siehe
+--                              sql/260514 Migration v1.0 zu v1.1 - role_type Project Geologist.sql)
 -- Korrespondiert mit: docs/Konzeptpapier_Junior-Mining-Erfolgs-Datenbank_v0.4.docx, Abschnitt 4
 
 PRAGMA foreign_keys = ON;
@@ -41,7 +44,7 @@ CREATE TABLE role (
     company_id  INTEGER NOT NULL REFERENCES company(id),
     role_type   TEXT NOT NULL CHECK (role_type IN (
         'CEO', 'Chairman', 'CFO', 'COO', 'President',
-        'VP Exploration', 'Chief Geologist',
+        'VP Exploration', 'Chief Geologist', 'Project Geologist',
         'Cornerstone Investor', 'Founder'
     )),
     start_date  TEXT,
