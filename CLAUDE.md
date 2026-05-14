@@ -1,0 +1,1 @@
+Wenn du Dateien abspeicherst immer in folgendem Format: YYMMDD Wer oder Was behandelt die datei und der Zweck. Zum Beispiel 260510 AliBaba Rechnung

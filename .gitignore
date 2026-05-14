@@ -1,0 +1,38 @@
+# macOS-Systemdateien
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Python-Cache und virtuelle Umgebungen
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.python-version
+
+# Jupyter-Notebook-Checkpoints
+.ipynb_checkpoints/
+
+# Editor-Müll
+.vscode/
+.idea/
+*.swp
+*~
+
+# Tokens, Secrets, Umgebungsvariablen
+.env
+.env.local
+secrets.json
+credentials.json
+*.pem
+*.key
+
+# SQLite-Hilfsdateien (die eigentliche .db-Datei wird versioniert)
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Temporäre Dateien
+*.tmp
+*.log
