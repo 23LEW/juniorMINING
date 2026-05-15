@@ -1,5 +1,5 @@
 -- Junior-Mining Erfolgs-Datenbank
--- Schema-Version: 1.2
+-- Schema-Version: 1.3
 -- Erstellt: 2026-05-14 (v1.0)
 -- Geaendert: 2026-05-14 (v1.1: role_type um 'Project Geologist' erweitert;
 --                              Migrationsskript siehe
@@ -9,6 +9,10 @@
 --                              um 'Exchange Upgrade', 'PDAC Award' umbenannt zu 'Industry Award';
 --                              Migrationsskript siehe
 --                              sql/260515 Migration v1.1 zu v1.2 - bio_text parent_project peak_marketcap event_vokabel.sql)
+-- Geaendert: 2026-05-15 (v1.3: event.event_type erweitert um 'Permit Granted',
+--                              'Permit Denied', 'Expropriation', 'Arbitration Award';
+--                              Migrationsskript siehe
+--                              sql/260515 Migration v1.2 zu v1.3 - event_type Permit Expropriation Arbitration.sql)
 -- Korrespondiert mit: docs/Konzeptpapier_Junior-Mining-Erfolgs-Datenbank_v0.4.docx, Abschnitt 4
 --                    docs/260515 Workflow Junior-Mining-DB v0.2.docx
 
@@ -100,7 +104,8 @@ CREATE TABLE event (
     event_type   TEXT NOT NULL CHECK (event_type IN (
         'PEA', 'PFS', 'FS', 'Discovery', 'M&A', 'Delisting', 'Insolvency',
         'Industry Award', 'IPO', 'Production Start', 'Resource Estimate',
-        'Exchange Upgrade'
+        'Exchange Upgrade',
+        'Permit Granted', 'Permit Denied', 'Expropriation', 'Arbitration Award'
     )),
     event_date   TEXT,
     description  TEXT
