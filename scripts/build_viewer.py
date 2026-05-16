@@ -330,7 +330,12 @@ def build_html(data):
                 },
 
                 getEventSources(eventId) {
-                    return window.DB.event_sources.filter(s => s.event_id === eventId);
+                    // Sources are now stored directly in event table
+                    const event = window.DB.events.find(e => e.id === eventId);
+                    if (event && event.source && event.url) {
+                        return [{ id: eventId, source: event.source, url: event.url }];
+                    }
+                    return [];
                 },
 
                 getPersonCareer(personId) {
