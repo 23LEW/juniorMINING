@@ -33,3 +33,24 @@ SQLite + Python (siehe `docs/Entscheidung_Software-Stack.docx`).
 - Empirische Gewichts-Kalibrierung statt heuristischer Vorgabe
 - Negativ-Sample zur Survivorship-Bias-Korrektur
 - Ambivalente Personen (in beiden Listen) zur Reverse-Causation-Mitigation
+
+## HTML Viewer
+
+**Live-Viewer:** `https://23lew.github.io/juniorMINING/` (nach GitHub Pages Aktivierung)
+
+**Lokale Nutzung:**
+```bash
+# Skript ausführen (regeneriert docs/index.html aus Datenbank)
+python3 scripts/build_viewer.py
+
+# Dann öffnen
+open docs/index.html
+```
+
+**Features:**
+- 📊 Companies Übersicht (sortierbar, filterbar, Farb-Status)
+- 🏢 Company-Detail (Personen, Projekte, Outcome-Scores, Event-Timeline)
+- 👥 Personen-Karriere-Pfade (wer, wann, wo, mit welchem Outcome)
+- 🔗 Cross-Links & Serial-Person Success-Rates
+
+Mehr unter `docs/VIEWER-SETUP.md`.

@@ -1,0 +1,57 @@
+Field,Value,Source,Date,Notes
+COMPANY_NAME,Detour Gold Corporation,,2006-08-21,Founded as 6600964 Canada Inc.; name changed Aug 21 2006
+LEGAL_ENTITY_STATUS,Wholly-owned subsidiary of Kirkland Lake Gold Ltd,Kirkland Lake Gold Completes Acquisition,2020-01-31,Delisted from TSX Feb 3 2020
+INCORPORATION_DATE,2006-07-19,Detour Gold Wikipedia,2006-07-19,Incorporated as 6600964 Canada Inc. per CBCA
+NAME_CHANGE_DATE,2006-08-21,Detour Gold Wikipedia,2006-08-21,Changed name to Detour Gold Corporation
+IPO_DATE,2007-01-31,Detour Gold Wikipedia,2007-01-31,Listed on Toronto Stock Exchange (TSX:DGC)
+PRIMARY_COMMODITY,Gold (Au),,2006,,
+PRIMARY_PROJECT,Detour Lake Mine,,2006,,
+PROJECT_LOCATION,Ontario, Canada - Abitibi Gold Belt,Detour Gold Wikipedia,,Northeast of Timmins/Cochrane near Quebec border; 100% owned
+FOUNDER_CEO,Gerald Panneton,Gerald Panneton MarketScreener,2006-08-21,President and CEO 2006-2013; later CEO of Gold Terra Resource Corp
+DISCOVERY_DATE,1974,Detour Lake Wikipedia,1974,Amoco discovery during base metal exploration program
+ORIGINAL_OPERATOR_1983_1999,Placer Dome Inc.,Placer Dome Wikipedia,1983-01-01,Initial reserve estimate: 3.5 M oz Au
+PROPERTY_ACQUISITION,Detour Gold formed by investor group led by Gerald Panneton,Detour Lake Wikipedia,2006-08-21,Property was maintained by Pelangio Mines Inc. until 2006
+FEASIBILITY_STUDY_COMPLETION,2010-06-30,Kaiser Research Technical Report,2010-06-30,PFS: $1.2B capex; 14.9 M oz reserve; 21-year LOM; US$625/oz breakeven; 11.3% IRR
+ENVIRONMENTAL_ASSESSMENT,2011-11-01,IAAC - Environment Canada,2011-11-01,Final Comprehensive Study Report for project development
+RESERVE_ESTIMATE_2010,4.8,Detour Lake Wikipedia,2010-12-31,Proven & Probable Reserve baseline in millions of ounces Au
+CONSTRUCTION_START,2011-01-01,Detour Lake Wikipedia,2011-01-01,Full capital development phase began
+CONSTRUCTION_COMPLETION,2012-10-01,Detour Gold Press Release,2012-10-01,95% completion; mill commissioning started
+FIRST_ORE_MILL,2013-01-12,Detour Gold Press Release,2013-01-12,Low-grade ore processing began in mill circuit
+FIRST_GOLD_POUR,2013-02-18,Detour Lake Wikipedia,2013-02-18,Ceremonial gold pour ~2000 oz; successful commissioning indicator
+COMMERCIAL_PRODUCTION_DATE,2013-08-07,Detour Gold Press Release,2013-08-07,Official commercial production achievement date
+ANNUAL_PRODUCTION_2018,621128,Detour Gold Press Release,2018-12-31,Ounces Au; exceeded guidance 595k-635k oz
+QUARTERLY_PRODUCTION_Q4_2018,158200,Detour Gold Press Release,2018-12-31,Best ever quarterly production to that date
+ANNUAL_PRODUCTION_2019,601566,Detour Gold Press Release,2019-12-31,Ounces Au; slightly below 2018 baseline
+MINERAL_RESERVES_DECEMBER_2018,15.4,Detour Gold FY2018 Results,2018-12-31,Proven & Probable Reserves in millions of ounces Au
+MEASURED_INDICATED_RESOURCES_2018,4.4,Detour Gold FY2018 Results,2018-12-31,Measured & Indicated Resources (includes Zone 58N additions) in M oz Au
+INFERRED_RESOURCES_2018,1.3,Detour Gold FY2018 Results,2018-12-31,Inferred Resources in millions of ounces Au
+RESERVE_LIFE_INDEX_2018,22,Detour Gold FY2018 Results,2018-12-31,Approximate years based on LOM plan throughput rates
+AISC_2018,1158,Detour Gold FY2018 Results,2018-12-31,All-in sustaining cost per ounce sold in USD
+REVENUE_2018,776.0,Detour Gold FY2018 Results,2018-12-31,In millions USD; 610,672 oz @ $1,268 avg realized price
+AISC_GUIDANCE_2019_LOW,1100,Detour Gold Guidance 2019,2019-01-01,AISC guidance range in USD per oz
+AISC_GUIDANCE_2019_HIGH,1175,Detour Gold Guidance 2019,2019-01-01,AISC guidance range in USD per oz
+CEO_INTERIM_2019_EARLY,Bill Williams,Detour Gold Press Release,2019-01-01,Appointed Interim CEO January 2019
+CFO_RESIGNATION,James Mavor,Detour Gold Press Release,2019-02-01,Resigned as CFO February 2019
+CEO_PERMANENT_2019,Mick McMullen,Junior Mining Network Press Release,2019-05-01,Appointed CEO and Director May 2019
+CFO_NEW_APPOINTMENT,Jaco Crouse,Detour Gold Press Release,2019-06-24,Appointed Chief Financial Officer effective June 24 2019; ex-Triple Flag Mining
+M&A_ANNOUNCEMENT_DATE,2019-11-25,Business Wire Press Release,2019-11-25,Kirkland Lake Gold acquisition announced November 25 2019
+M&A_AGREEMENT_DATE,2019-11-24,SEC Filing Exhibit 99.3,2019-11-24,Definitive agreement signed November 24 2019
+ACQUIRER_NAME,Kirkland Lake Gold Ltd.,Kirkland Lake Press Release,2019-11-25,TSX: KL; all-stock acquisition arrangement
+DEAL_VALUE_CAD,4900,Business Wire,2019-11-25,In millions CAD
+DEAL_VALUE_USD,3680,Mining Technology,2019-11-25,In millions USD
+DEAL_STRUCTURE,All-stock arrangement,SEC Exhibit 99.3,2019-11-25,Plan of Arrangement under corporate law
+EXCHANGE_RATIO,0.4343,SEC Exhibit 99.3,2019-11-25,Kirkland Lake Gold shares per Detour Gold share
+VWAP_PREMIUM,29,SEC Exhibit 99.3,2019-11-24,Percentage premium over 20-day VWAP through Nov 22 2019
+SHARES_ISSUED,77217129,Kirkland Lake Press Release,2020-01-31,Kirkland Lake shares issued to Detour shareholders
+KIRKLAND_PRO_FORMA_OWNERSHIP,73,Kirkland Lake Press Release,2020-01-31,Percentage ownership post-acquisition
+DETOUR_PRO_FORMA_OWNERSHIP,27,Kirkland Lake Press Release,2020-01-31,Percentage ownership of Detour shareholders post-transaction
+ANNUAL_COST_SYNERGIES_LOW,75,Business Wire,2019-11-25,Pre-tax savings estimate in millions USD per annum
+ANNUAL_COST_SYNERGIES_HIGH,100,Business Wire,2019-11-25,Pre-tax savings estimate in millions USD per annum
+RESERVE_BASE_ADDITION,15.41,Kirkland Lake Press Release,2020-01-31,Ounces Au added to Kirkland Lake reserve base from acquisition
+RESERVE_LIFE_EXTENSION,8,Kirkland Lake Press Release,2020-01-31,Years added to Kirkland Lake reserve life index
+PRO_FORMA_ANNUAL_PRODUCTION,1500000,Kirkland Lake Press Release,2020-01-31,Estimated ounces Au annually post-transaction (in oz; 1.5+ M oz)
+M&A_CLOSE_DATE,2020-01-31,Kirkland Lake Press Release,2020-01-31,Acquisition completed and effective
+TIME_TO_CLOSE,68,Calculated,2020-01-31,Days from announcement (Nov 25) to close (Jan 31)
+DELISTING_DATE,2020-02-03,Kirkland Lake Press Release,2020-01-31,Detour Gold shares delisted from TSX
+KIRKLAND_SEC_FILING,Form 6-K,SEC Archive,2020-01-31,SEC filing for acquisition completion
+KIRKLAND_SEC_EXHIBIT,99.3,SEC Archive,2019-11-25,Definitive agreement and transaction documents

@@ -1,0 +1,84 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 AppleColorEmoji;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 # Junior Mining DB \'97 Projekt Status\
+\
+## 
+\f1 \uc0\u55357 \u56522 
+\f0  Datenbank-\'dcbersicht (Stand 2026-05-16)\
+- **Pfad:** /Users/lew/Dokumente/Business/JuniorMiner/JuniorMining/data/junior_mining.db\
+- **Companies:** 22 (Batches 1-4 komplett)\
+- **Persons:** 90\
+- **Roles:** 140+\
+- **Outcomes:** 21\
+- **Events:** 187\
+- **Sources:** 403\
+\
+## 
+\f1 \uc0\u55357 \u56615 
+\f0  Schema v1.3\
+Erlaubte Werte (CHECK-Constraints):\
+- **success_label:** 'success', 'failure', 'ambivalent', 'pending'\
+- **role_type:** CEO, Chairman, CFO, COO, President, VP Exploration, Chief Geologist, Project Geologist, Cornerstone Investor, Founder\
+- **stage_at_acquisition:** Greenfield, Brownfield, Discovery, PEA, PFS, FS, Construction, Production\
+- **exit_type:** M&A, Production, Insolvency, Delisting, Active\
+- **event_type:** PEA, PFS, FS, Discovery, M&A, Delisting, Insolvency, Industry Award, IPO, Production Start, Resource Estimate, Exchange Upgrade, Permit Granted, Permit Denied, Expropriation, Arbitration Award\
+\
+## 
+\f1 \uc0\u55357 \u56523 
+\f0  Batch-Status\
+| Batch | Companies | Status | Sources |\
+|-------|-----------|--------|---------|\
+| 1 | Aurelian, Crystallex, Colossus, Allied Nevada, Banro | 
+\f1 \uc0\u9989 
+\f0  | 90 |\
+| 2 | Probe Mines, Pretium, Reservoir | 
+\f1 \uc0\u9989 
+\f0  | 85 |\
+| 3 | Aurcana, Gold Mountain, Apollo, Avion, Sulliden | 
+\f1 \uc0\u9989 
+\f0  | 85 |\
+| 4 | Kaminak, Continental, NovaGold, Underworld, Virginia | 
+\f1 \uc0\u9989 
+\f0  | 91 |\
+| 5 | TBD | 
+\f1 \uc0\u9203 
+\f0  | \'97 |\
+\
+## 
+\f1 \uc0\u9888 \u65039 
+\f0  Bekannte Issues & Workarounds\
+- **Journal-Datei-Lock:** `rm /Users/lew/Dokumente/Business/JuniorMiner/JuniorMining/data/junior_mining.db-journal`\
+- **DB \'f6ffnen fehlgeschlagen:** Alte DB als backup umbenennen, neue DB kopieren\
+- **Sources verloren:** Jetzt immer nach Agent-Output speichern\
+\
+## 
+\f1 \uc0\u55356 \u57263 
+\f0  Pipeline v3 Regeln (Quick Check)\
+
+\f1 \uc0\u9989 
+\f0  Min. 15 Quellen pro Company  \
+
+\f1 \uc0\u9989 
+\f0  Alle Agent-Outputs sofort speichern  \
+
+\f1 \uc0\u9989 
+\f0  Score-Formeln im SQL-Kommentar  \
+
+\f1 \uc0\u9989 
+\f0  Pre-Flight-Check vor SQL-Execute  \
+
+\f1 \uc0\u9989 
+\f0  R\'fcckfrage bei methodischen Entscheidungen  \
+\
+## 
+\f1 \uc0\u55357 \u56592 
+\f0  Dateibenennung\
+Format: `YYMMDD Wer/Was Zweck`  \
+Beispiele:\
+- `260516 Batch 4 Audit.md`\
+- `260517 Kaminak Quellen.md` (NEW)}
