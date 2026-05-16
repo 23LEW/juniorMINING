@@ -37,6 +37,9 @@ def read_db():
     cursor.execute("SELECT * FROM event ORDER BY company_id, event_date")
     data["events"] = [dict(row) for row in cursor.fetchall()]
 
+    cursor.execute("SELECT * FROM event_sources")
+    data["event_sources"] = [dict(row) for row in cursor.fetchall()]
+
     conn.close()
     return data
 
@@ -181,7 +184,7 @@ def build_html(data):
                         <h3 style="margin-top: 2rem;">Events & Meilensteine</h3>
                         <table>
                             <thead>
-                                <tr><th>Date</th><th>Type</th><th>Description</th></tr>
+                                <tr><th>Date</th><th>Type</th><th>Description</th><th>Quellen</th></tr>
                             </thead>
                             <tbody>
                                 <template x-for="e in getCompanyEvents()" :key="e.id">
@@ -189,6 +192,18 @@ def build_html(data):
                                         <td x-text="e.event_date || '—'"></td>
                                         <td><strong x-text="e.event_type || '—'"></strong></td>
                                         <td x-text="e.description || '—'"></td>
+                                        <td>
+                                            <template x-for="s in getEventSources(e.id)" :key="s.id">
+                                                <div style="font-size: 0.9rem; margin: 0.3rem 0;">
+                                                    <template x-if="s.url">
+                                                        <a :href="s.url" target="_blank" x-text="s.source" style="color: #2980b9; text-decoration: underline;"></a>
+                                                    </template>
+                                                    <template x-if="!s.url">
+                                                        <span x-text="s.source"></span>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </td>
                                     </tr>
                                 </template>
                             </tbody>
@@ -311,6 +326,10 @@ def build_html(data):
                         if (!b.event_date) return -1;
                         return a.event_date.localeCompare(b.event_date);
                     });
+                },
+
+                getEventSources(eventId) {
+                    return window.DB.event_sources.filter(s => s.event_id === eventId);
                 },
 
                 getPersonCareer(personId) {
