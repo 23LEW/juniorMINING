@@ -347,7 +347,7 @@
                     this.events = db.events;
                 }
 
-                get filteredCompanies() {
+                filteredCompanies() {
                     let filtered = this.companies;
 
                     if (this.filters.status) {
@@ -388,7 +388,7 @@
                     return filtered;
                 }
 
-                get filteredPersonsWithCounts() {
+                filteredPersonsWithCounts() {
                     let filtered = this.persons.map(p => ({
                         ...p,
                         companies_count: this.getCompanyPersons(p.id).length,
@@ -422,7 +422,7 @@
                     return filtered;
                 }
 
-                get serialPersons() {
+                serialPersons() {
                     return this.filteredPersonsWithCounts
                         .filter(p => {
                             const career = this.getPersonCareer(p.id);
@@ -592,7 +592,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <template x-for="company in filteredCompanies" :key="company.id">
+                        <template x-for="company in filteredCompanies()" :key="company.id">
                             <tr @click="selectCompany(company.id)" class="clickable">
                                 <td><strong>{{ company.name }}</strong></td>
                                 <td>
@@ -610,7 +610,7 @@
                     </tbody>
                 </table>
 
-                <div x-show="filteredCompanies.length === 0" class="no-data">
+                <div x-show="filteredCompanies().length === 0" class="no-data">
                     Keine Companies gefunden.
                 </div>
             </div>
@@ -752,7 +752,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <template x-for="person in filteredPersonsWithCounts" :key="person.id">
+                        <template x-for="person in filteredPersonsWithCounts()" :key="person.id">
                             <tr @click="selectPerson(person.id)" class="clickable">
                                 <td><strong>{{ person.vorname }} {{ person.nachname }}</strong></td>
                                 <td>{{ person.birth_year || '—' }}</td>
@@ -823,7 +823,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <template x-for="person in serialPersons" :key="person.id">
+                        <template x-for="person in serialPersons()" :key="person.id">
                             <tr>
                                 <td><strong>{{ person.vorname }} {{ person.nachname }}</strong></td>
                                 <td>{{ person.companies_count }}</td>
@@ -839,7 +839,7 @@
                     </tbody>
                 </table>
 
-                <div x-show="serialPersons.length === 0" class="no-data">
+                <div x-show="serialPersons().length === 0" class="no-data">
                     Keine Serien-Personen gefunden (mit mind. {{ minCompaniesForSerial }} Companies).
                 </div>
             </div>

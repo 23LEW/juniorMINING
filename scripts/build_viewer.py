@@ -413,7 +413,7 @@ def build_html(data):
                     this.events = db.events;
                 }}
 
-                get filteredCompanies() {{
+                filteredCompanies() {{
                     let filtered = this.companies;
 
                     if (this.filters.status) {{
@@ -454,7 +454,7 @@ def build_html(data):
                     return filtered;
                 }}
 
-                get filteredPersonsWithCounts() {{
+                filteredPersonsWithCounts() {{
                     let filtered = this.persons.map(p => ({{
                         ...p,
                         companies_count: this.getCompanyPersons(p.id).length,
@@ -488,7 +488,7 @@ def build_html(data):
                     return filtered;
                 }}
 
-                get serialPersons() {{
+                serialPersons() {{
                     return this.filteredPersonsWithCounts
                         .filter(p => {{
                             const career = this.getPersonCareer(p.id);
@@ -658,7 +658,7 @@ def build_html(data):
                         </tr>
                     </thead>
                     <tbody>
-                        <template x-for="company in filteredCompanies" :key="company.id">
+                        <template x-for="company in filteredCompanies()" :key="company.id">
                             <tr @click="selectCompany(company.id)" class="clickable">
                                 <td><strong>{{{{ company.name }}}}</strong></td>
                                 <td>
@@ -676,7 +676,7 @@ def build_html(data):
                     </tbody>
                 </table>
 
-                <div x-show="filteredCompanies.length === 0" class="no-data">
+                <div x-show="filteredCompanies().length === 0" class="no-data">
                     Keine Companies gefunden.
                 </div>
             </div>
@@ -818,7 +818,7 @@ def build_html(data):
                         </tr>
                     </thead>
                     <tbody>
-                        <template x-for="person in filteredPersonsWithCounts" :key="person.id">
+                        <template x-for="person in filteredPersonsWithCounts()" :key="person.id">
                             <tr @click="selectPerson(person.id)" class="clickable">
                                 <td><strong>{{{{ person.vorname }}}} {{{{ person.nachname }}}}</strong></td>
                                 <td>{{{{ person.birth_year || '—' }}}}</td>
@@ -889,7 +889,7 @@ def build_html(data):
                         </tr>
                     </thead>
                     <tbody>
-                        <template x-for="person in serialPersons" :key="person.id">
+                        <template x-for="person in serialPersons()" :key="person.id">
                             <tr>
                                 <td><strong>{{{{ person.vorname }}}} {{{{ person.nachname }}}}</strong></td>
                                 <td>{{{{ person.companies_count }}}}</td>
@@ -905,7 +905,7 @@ def build_html(data):
                     </tbody>
                 </table>
 
-                <div x-show="serialPersons.length === 0" class="no-data">
+                <div x-show="serialPersons().length === 0" class="no-data">
                     Keine Serien-Personen gefunden (mit mind. {{{{ minCompaniesForSerial }}}} Companies).
                 </div>
             </div>
