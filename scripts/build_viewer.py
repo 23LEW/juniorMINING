@@ -37,8 +37,9 @@ def read_db():
     cursor.execute("SELECT * FROM event ORDER BY company_id, event_date")
     data["events"] = [dict(row) for row in cursor.fetchall()]
 
-    cursor.execute("SELECT * FROM event_sources")
-    data["event_sources"] = [dict(row) for row in cursor.fetchall()]
+    # event_sources now integrated into event table (source, url columns)
+    # Keep empty for backward compatibility
+    data["event_sources"] = []
 
     conn.close()
     return data
