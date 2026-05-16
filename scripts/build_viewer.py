@@ -177,6 +177,22 @@ def build_html(data):
                                 </template>
                             </tbody>
                         </table>
+
+                        <h3 style="margin-top: 2rem;">Events & Meilensteine</h3>
+                        <table>
+                            <thead>
+                                <tr><th>Date</th><th>Type</th><th>Description</th></tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="e in getCompanyEvents()" :key="e.id">
+                                    <tr>
+                                        <td x-text="e.event_date || '—'"></td>
+                                        <td><strong x-text="e.event_type || '—'"></strong></td>
+                                        <td x-text="e.description || '—'"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
                     </div>
                 </template>
                 <template x-if="!selectedCompany">
@@ -286,6 +302,15 @@ def build_html(data):
                 getCompanyProjects() {
                     if (!this.selectedCompany) return [];
                     return window.DB.projects.filter(p => p.company_id === this.selectedCompany.id);
+                },
+
+                getCompanyEvents() {
+                    if (!this.selectedCompany) return [];
+                    return window.DB.events.filter(e => e.company_id === this.selectedCompany.id).sort((a, b) => {
+                        if (!a.event_date) return 1;
+                        if (!b.event_date) return -1;
+                        return a.event_date.localeCompare(b.event_date);
+                    });
                 },
 
                 getPersonCareer(personId) {
