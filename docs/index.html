@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Junior-Mining DB — HTML Viewer</title>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <style>
         * {
@@ -311,6 +311,217 @@
             }
         }
     </style>
+
+    <script>
+        // Define app function BEFORE Alpine initializes
+        function app() {
+            return {
+                activeTab: 'overview',
+                companies: [],
+                persons: [],
+                projects: [],
+                roles: [],
+                events: [],
+                selectedCompany: null,
+                selectedPerson: null,
+
+                filters: {
+                    status: '',
+                    commodity: '',
+                    country: '',
+                    exitYear: null,
+                    personName: ''
+                },
+
+                sortField: 'name',
+                sortDir: 'asc',
+                sortFieldPersons: 'companies_count',
+                sortDirPersons: 'desc',
+                minCompaniesForSerial: 2,
+
+                init() {
+                    this.companies = db.companies;
+                    this.persons = db.persons;
+                    this.projects = db.projects;
+                    this.roles = db.roles;
+                    this.events = db.events;
+                }
+
+                get filteredCompanies() {
+                    let filtered = this.companies;
+
+                    if (this.filters.status) {
+                        filtered = filtered.filter(c => c.success_label === this.filters.status);
+                    }
+                    if (this.filters.commodity) {
+                        filtered = filtered.filter(c =>
+                            (c.primary_commodity?.includes(this.filters.commodity)) ||
+                            (c.commodity_2?.includes(this.filters.commodity)) ||
+                            (c.commodity_3?.includes(this.filters.commodity))
+                        );
+                    }
+                    if (this.filters.country) {
+                        filtered = filtered.filter(c => c.country?.includes(this.filters.country));
+                    }
+                    if (this.filters.exitYear) {
+                        filtered = filtered.filter(c => c.exit_year === this.filters.exitYear);
+                    }
+
+                    // Sort
+                    filtered.sort((a, b) => {
+                        let aVal = a[this.sortField];
+                        let bVal = b[this.sortField];
+
+                        if (aVal == null) aVal = '';
+                        if (bVal == null) bVal = '';
+
+                        if (typeof aVal === 'string') {
+                            aVal = aVal.toLowerCase();
+                            bVal = bVal.toLowerCase();
+                        }
+
+                        if (aVal < bVal) return this.sortDir === 'asc' ? -1 : 1;
+                        if (aVal > bVal) return this.sortDir === 'asc' ? 1 : -1;
+                        return 0;
+                    });
+
+                    return filtered;
+                }
+
+                get filteredPersonsWithCounts() {
+                    let filtered = this.persons.map(p => ({
+                        ...p,
+                        companies_count: this.getCompanyPersons(p.id).length,
+                        companies_count_for_career: this.getPersonCareer(p.id).map(c => c.company_id)
+                    }));
+
+                    if (this.filters.personName) {
+                        filtered = filtered.filter(p =>
+                            p.nachname.toLowerCase().includes(this.filters.personName.toLowerCase())
+                        );
+                    }
+
+                    // Sort
+                    filtered.sort((a, b) => {
+                        let aVal = a[this.sortFieldPersons];
+                        let bVal = b[this.sortFieldPersons];
+
+                        if (aVal == null) aVal = '';
+                        if (bVal == null) bVal = '';
+
+                        if (typeof aVal === 'string') {
+                            aVal = aVal.toLowerCase();
+                            bVal = bVal.toLowerCase();
+                        }
+
+                        if (aVal < bVal) return this.sortDirPersons === 'asc' ? -1 : 1;
+                        if (aVal > bVal) return this.sortDirPersons === 'asc' ? 1 : -1;
+                        return 0;
+                    });
+
+                    return filtered;
+                }
+
+                get serialPersons() {
+                    return this.filteredPersonsWithCounts
+                        .filter(p => {
+                            const career = this.getPersonCareer(p.id);
+                            return career.length >= this.minCompaniesForSerial;
+                        })
+                        .map(p => {
+                            const career = this.getPersonCareer(p.id);
+                            const successCount = career.filter(c => c.success_label === 'success').length;
+                            const failureCount = career.filter(c => c.success_label === 'failure').length;
+                            return {
+                                ...p,
+                                companies_count: career.length,
+                                success_count: successCount,
+                                failure_count: failureCount,
+                                success_rate: career.length > 0 ? successCount / career.length : 0
+                            };
+                        })
+                        .sort((a, b) => b.success_rate - a.success_rate);
+                }
+
+                sort(field) {
+                    if (this.sortField === field) {
+                        this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        this.sortField = field;
+                        this.sortDir = 'asc';
+                    }
+                }
+
+                sortPersons(field) {
+                    if (this.sortFieldPersons === field) {
+                        this.sortDirPersons = this.sortDirPersons === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        this.sortFieldPersons = field;
+                        this.sortDirPersons = 'desc';
+                    }
+                }
+
+                selectCompany(id) {
+                    this.selectedCompany = this.companies.find(c => c.id === id) || null;
+                    this.activeTab = 'detail';
+                }
+
+                selectPerson(id) {
+                    this.selectedPerson = this.persons.find(p => p.id === id) || null;
+                }
+
+                getCompanyPersons(companyId) {
+                    const roles = this.roles.filter(r => r.company_id === companyId);
+                    return roles.map(r => {
+                        const person = this.persons.find(p => p.id === r.person_id);
+                        return {
+                            ...person,
+                            role_type: r.role_type,
+                            start_date: r.start_date,
+                            end_date: r.end_date,
+                            id: r.id
+                        };
+                    });
+                }
+
+                getCompanyProjects(companyId) {
+                    return this.projects.filter(p => p.company_id === companyId);
+                }
+
+                getCompanyEvents(companyId) {
+                    return this.events.filter(e => e.company_id === companyId).sort((a, b) => {
+                        if (!a.event_date) return 1;
+                        if (!b.event_date) return -1;
+                        return a.event_date.localeCompare(b.event_date);
+                    });
+                }
+
+                getPersonCareer(personId) {
+                    const roles = this.roles.filter(r => r.person_id === personId);
+                    return roles.map(r => {
+                        const company = this.companies.find(c => c.id === r.company_id);
+                        return {
+                            role_id: r.id,
+                            company_id: company?.id,
+                            company_name: company?.name,
+                            role_type: r.role_type,
+                            start_date: r.start_date,
+                            end_date: r.end_date,
+                            success_label: company?.success_label
+                        };
+                    });
+                }
+
+                getStatusClass(status) {
+                    if (!status) return '';
+                    if (status === 'success') return 'status-success';
+                    if (status === 'failure') return 'status-failure';
+                    if (status === 'ambivalent') return 'status-ambivalent';
+                    return '';
+                }
+            };
+        }
+    </script>
 </head>
 <body>
     <div x-data="app()" x-init="init()">
@@ -1179,14 +1390,14 @@
       "commodity_3": null,
       "fraud_flag": 0,
       "success_label": "success",
-      "discovery_score": null,
-      "reserve_conversion_score": null,
-      "exit_production_score": null,
-      "peak_marketcap_score": null,
-      "total_score": null,
-      "exit_type": null,
-      "exit_year": null,
-      "peak_marketcap_cad_million": null
+      "discovery_score": 75.0,
+      "reserve_conversion_score": 85.0,
+      "exit_production_score": 90.0,
+      "peak_marketcap_score": 80.0,
+      "total_score": 83.0,
+      "exit_type": "M&A",
+      "exit_year": 2023,
+      "peak_marketcap_cad_million": 1200.0
     },
     {
       "id": 27,
@@ -1209,6 +1420,50 @@
       "exit_type": null,
       "exit_year": null,
       "peak_marketcap_cad_million": null
+    },
+    {
+      "id": 28,
+      "name": "Great Bear Resources Ltd.",
+      "isin": null,
+      "country": "Canada",
+      "stock_exchange": "TSX-V",
+      "listing_year": 2010,
+      "delisting_year": 2022,
+      "primary_commodity": "Au",
+      "commodity_2": null,
+      "commodity_3": null,
+      "fraud_flag": 0,
+      "success_label": "success",
+      "discovery_score": 90.0,
+      "reserve_conversion_score": 85.0,
+      "exit_production_score": 75.0,
+      "peak_marketcap_score": 85.0,
+      "total_score": 83.25,
+      "exit_type": "M&A",
+      "exit_year": 2022,
+      "peak_marketcap_cad_million": 1800.0
+    },
+    {
+      "id": 29,
+      "name": "Osisko Mining Inc.",
+      "isin": null,
+      "country": "Canada",
+      "stock_exchange": "TSX",
+      "listing_year": 2006,
+      "delisting_year": 2024,
+      "primary_commodity": "Au",
+      "commodity_2": null,
+      "commodity_3": null,
+      "fraud_flag": 0,
+      "success_label": "success",
+      "discovery_score": 95.0,
+      "reserve_conversion_score": 90.0,
+      "exit_production_score": 85.0,
+      "peak_marketcap_score": 95.0,
+      "total_score": 90.75,
+      "exit_type": "M&A",
+      "exit_year": 2024,
+      "peak_marketcap_cad_million": 2160.0
     }
   ],
   "persons": [
@@ -1367,6 +1622,18 @@
       "first_mention_year": 2013,
       "first_mention_source": "YAHOO-BUFF-2013",
       "bio_text": "Mining Executive mit 28+ Jahren Operations. Vorher SVP Operations Coeur d'Alene Mines; davor General Manager Barrick Goldstrike. Uebernahm Allied Nevada Operations Feb 2013 als COO, dann President + CEO ab Juli 2013; fuehrte durch Chapter 11."
+    },
+    {
+      "id": 107,
+      "vorname": "John",
+      "nachname": "Burzynski",
+      "birth_year": null,
+      "education": null,
+      "country": "Canada",
+      "production_ramp_up_experience": 1,
+      "first_mention_year": 2003,
+      "first_mention_source": null,
+      "bio_text": "Co-Founder & Executive Chairman Osisko Mining (2003-2024)"
     },
     {
       "id": 28,
@@ -2089,6 +2356,18 @@
       "bio_text": "Senior Mining Executive, 32+ Jahre. Mitglied des original Founding-Teams Katanga Mining; Senior-Rollen Kinross Gold, Co-Steel, Avocet, Roxgold, Octéa, African Thunder Platinum. Appointed Chairman/CEO Post-CCAA Banro 07.05.2018."
     },
     {
+      "id": 106,
+      "vorname": "Sean",
+      "nachname": "Roosen",
+      "birth_year": null,
+      "education": null,
+      "country": "Canada",
+      "production_ramp_up_experience": 1,
+      "first_mention_year": 2003,
+      "first_mention_source": null,
+      "bio_text": "Founder of Osisko Mining (2003), Mining Person of the Year 2009"
+    },
+    {
       "id": 42,
       "vorname": "Bubaka",
       "nachname": "Rudahya",
@@ -2147,6 +2426,18 @@
       "first_mention_year": 2024,
       "first_mention_source": "JMN-GMTN-SIFTON",
       "bio_text": "Director; Interim CEO Nov 2024 - Jul 2025 (Receivership). Tenure beendet durch Receivership-Order."
+    },
+    {
+      "id": 105,
+      "vorname": "Bob",
+      "nachname": "Singh",
+      "birth_year": null,
+      "education": "P.Sc., P.Geo",
+      "country": "Canada",
+      "production_ramp_up_experience": 1,
+      "first_mention_year": 2010,
+      "first_mention_source": null,
+      "bio_text": "VP Exploration Great Bear Resources (2010+), 25+ years experience, UBC graduate"
     },
     {
       "id": 72,
@@ -2219,6 +2510,18 @@
       "first_mention_year": 2013,
       "first_mention_source": "MS-TAGLIAMONTE",
       "bio_text": "CEO + Chairman Sulliden Gold 2013-2014. Mining Executive; fuehrte Sulliden durch Shahuindo-Development (EIA-Approval Sept 2013) und M&A-Verhandlungen mit Rio Alto Mining."
+    },
+    {
+      "id": 104,
+      "vorname": "Chris",
+      "nachname": "Taylor",
+      "birth_year": null,
+      "education": "M.Sc., P.Geo",
+      "country": "Canada",
+      "production_ramp_up_experience": 1,
+      "first_mention_year": 2010,
+      "first_mention_source": null,
+      "bio_text": "Founder, President & CEO Great Bear Resources (2010-2022), Mining Person of the Year 2021"
     },
     {
       "id": 86,
@@ -2339,6 +2642,18 @@
       "first_mention_year": 2006,
       "first_mention_source": "SEDAR-CSI-AIF",
       "bio_text": "Senior VP Exploration Colossus; reinterpretierte Serra-Pelada-Geologie und steuerte Drill-Targeting. Co-Winner Goldcorp Challenge 2001. Gruendender geologischer Partner mit Sussman; auch Co-Founder Continental Gold als Special Advisor. Verstorben; ScienceDirect-Paper zu Serra Pelada-Geochemie seinem Andenken gewidmet (Berni et al. 2014, Economic Geology v.109)."
+    },
+    {
+      "id": 108,
+      "vorname": "Robert",
+      "nachname": "Wares",
+      "birth_year": null,
+      "education": null,
+      "country": "Canada",
+      "production_ramp_up_experience": 1,
+      "first_mention_year": 2015,
+      "first_mention_source": null,
+      "bio_text": "CEO Osisko Mining (2015-2024), led Windfall development"
     },
     {
       "id": 61,
@@ -2881,6 +3196,32 @@
       "deposit_type": null,
       "stage_at_acquisition": "Production",
       "peak_stage": "Production",
+      "parent_project_id": null
+    },
+    {
+      "id": 38,
+      "company_id": 28,
+      "name": "Dixie Project",
+      "jurisdiction": "Red Lake District, Ontario, Canada",
+      "primary_commodity": "Au",
+      "commodity_2": null,
+      "commodity_3": null,
+      "deposit_type": null,
+      "stage_at_acquisition": "Discovery",
+      "peak_stage": "FS",
+      "parent_project_id": null
+    },
+    {
+      "id": 39,
+      "company_id": 29,
+      "name": "Windfall Gold Project",
+      "jurisdiction": "Lebel-sur-Quevillon, Quebec, Canada",
+      "primary_commodity": "Au",
+      "commodity_2": null,
+      "commodity_3": null,
+      "deposit_type": null,
+      "stage_at_acquisition": "FS",
+      "peak_stage": "FS",
       "parent_project_id": null
     }
   ],
@@ -4060,6 +4401,38 @@
       "role_type": "CFO",
       "start_date": "2019-05-15",
       "end_date": "2020-01-31"
+    },
+    {
+      "id": 154,
+      "person_id": 104,
+      "company_id": 28,
+      "role_type": "CEO",
+      "start_date": "2010-01-01",
+      "end_date": "2022-02-24"
+    },
+    {
+      "id": 155,
+      "person_id": 105,
+      "company_id": 28,
+      "role_type": "VP Exploration",
+      "start_date": "2010-01-01",
+      "end_date": "2022-02-24"
+    },
+    {
+      "id": 156,
+      "person_id": 108,
+      "company_id": 29,
+      "role_type": "CEO",
+      "start_date": "2015-01-01",
+      "end_date": "2024-10-25"
+    },
+    {
+      "id": 157,
+      "person_id": 107,
+      "company_id": 29,
+      "role_type": "Chairman",
+      "start_date": "2015-01-01",
+      "end_date": "2024-10-25"
     }
   ],
   "events": [
@@ -5399,217 +5772,37 @@
       "event_type": "M&A",
       "event_date": "2020-01-31",
       "description": "Kirkland Lake Gold completes acquisition of Detour Gold for CAD 4.9B (29% VWAP premium)"
+    },
+    {
+      "id": 192,
+      "company_id": 28,
+      "event_type": "Discovery",
+      "event_date": "2019-01-01",
+      "description": "Dixie Project discovery at Red Lake District"
+    },
+    {
+      "id": 193,
+      "company_id": 28,
+      "event_type": "M&A",
+      "event_date": "2022-02-24",
+      "description": "Kinross Gold Corporation completes acquisition for CAD 1.8B"
+    },
+    {
+      "id": 194,
+      "company_id": 29,
+      "event_type": "FS",
+      "event_date": "2022-11-28",
+      "description": "Osisko Mining Positive Feasibility Study for Windfall"
+    },
+    {
+      "id": 195,
+      "company_id": 29,
+      "event_type": "M&A",
+      "event_date": "2024-10-25",
+      "description": "Gold Fields Limited completes acquisition for CAD 2.16B"
     }
   ]
 };
-
-        function app() {
-            return {
-                activeTab: 'overview',
-                companies: [],
-                persons: [],
-                projects: [],
-                roles: [],
-                events: [],
-                selectedCompany: null,
-                selectedPerson: null,
-
-                filters: {
-                    status: '',
-                    commodity: '',
-                    country: '',
-                    exitYear: null,
-                    personName: ''
-                },
-
-                sortField: 'name',
-                sortDir: 'asc',
-                sortFieldPersons: 'companies_count',
-                sortDirPersons: 'desc',
-                minCompaniesForSerial: 2,
-
-                init() {
-                    this.companies = db.companies;
-                    this.persons = db.persons;
-                    this.projects = db.projects;
-                    this.roles = db.roles;
-                    this.events = db.events;
-                }
-
-                get filteredCompanies() {
-                    let filtered = this.companies;
-
-                    if (this.filters.status) {
-                        filtered = filtered.filter(c => c.success_label === this.filters.status);
-                    }
-                    if (this.filters.commodity) {
-                        filtered = filtered.filter(c =>
-                            (c.primary_commodity?.includes(this.filters.commodity)) ||
-                            (c.commodity_2?.includes(this.filters.commodity)) ||
-                            (c.commodity_3?.includes(this.filters.commodity))
-                        );
-                    }
-                    if (this.filters.country) {
-                        filtered = filtered.filter(c => c.country?.includes(this.filters.country));
-                    }
-                    if (this.filters.exitYear) {
-                        filtered = filtered.filter(c => c.exit_year === this.filters.exitYear);
-                    }
-
-                    // Sort
-                    filtered.sort((a, b) => {
-                        let aVal = a[this.sortField];
-                        let bVal = b[this.sortField];
-
-                        if (aVal == null) aVal = '';
-                        if (bVal == null) bVal = '';
-
-                        if (typeof aVal === 'string') {
-                            aVal = aVal.toLowerCase();
-                            bVal = bVal.toLowerCase();
-                        }
-
-                        if (aVal < bVal) return this.sortDir === 'asc' ? -1 : 1;
-                        if (aVal > bVal) return this.sortDir === 'asc' ? 1 : -1;
-                        return 0;
-                    });
-
-                    return filtered;
-                }
-
-                get filteredPersonsWithCounts() {
-                    let filtered = this.persons.map(p => ({
-                        ...p,
-                        companies_count: this.getCompanyPersons(p.id).length,
-                        companies_count_for_career: this.getPersonCareer(p.id).map(c => c.company_id)
-                    }));
-
-                    if (this.filters.personName) {
-                        filtered = filtered.filter(p =>
-                            p.nachname.toLowerCase().includes(this.filters.personName.toLowerCase())
-                        );
-                    }
-
-                    // Sort
-                    filtered.sort((a, b) => {
-                        let aVal = a[this.sortFieldPersons];
-                        let bVal = b[this.sortFieldPersons];
-
-                        if (aVal == null) aVal = '';
-                        if (bVal == null) bVal = '';
-
-                        if (typeof aVal === 'string') {
-                            aVal = aVal.toLowerCase();
-                            bVal = bVal.toLowerCase();
-                        }
-
-                        if (aVal < bVal) return this.sortDirPersons === 'asc' ? -1 : 1;
-                        if (aVal > bVal) return this.sortDirPersons === 'asc' ? 1 : -1;
-                        return 0;
-                    });
-
-                    return filtered;
-                }
-
-                get serialPersons() {
-                    return this.filteredPersonsWithCounts
-                        .filter(p => {
-                            const career = this.getPersonCareer(p.id);
-                            return career.length >= this.minCompaniesForSerial;
-                        })
-                        .map(p => {
-                            const career = this.getPersonCareer(p.id);
-                            const successCount = career.filter(c => c.success_label === 'success').length;
-                            const failureCount = career.filter(c => c.success_label === 'failure').length;
-                            return {
-                                ...p,
-                                companies_count: career.length,
-                                success_count: successCount,
-                                failure_count: failureCount,
-                                success_rate: career.length > 0 ? successCount / career.length : 0
-                            };
-                        })
-                        .sort((a, b) => b.success_rate - a.success_rate);
-                }
-
-                sort(field) {
-                    if (this.sortField === field) {
-                        this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
-                    } else {
-                        this.sortField = field;
-                        this.sortDir = 'asc';
-                    }
-                }
-
-                sortPersons(field) {
-                    if (this.sortFieldPersons === field) {
-                        this.sortDirPersons = this.sortDirPersons === 'asc' ? 'desc' : 'asc';
-                    } else {
-                        this.sortFieldPersons = field;
-                        this.sortDirPersons = 'desc';
-                    }
-                }
-
-                selectCompany(id) {
-                    this.selectedCompany = this.companies.find(c => c.id === id) || null;
-                    this.activeTab = 'detail';
-                }
-
-                selectPerson(id) {
-                    this.selectedPerson = this.persons.find(p => p.id === id) || null;
-                }
-
-                getCompanyPersons(companyId) {
-                    const roles = this.roles.filter(r => r.company_id === companyId);
-                    return roles.map(r => {
-                        const person = this.persons.find(p => p.id === r.person_id);
-                        return {
-                            ...person,
-                            role_type: r.role_type,
-                            start_date: r.start_date,
-                            end_date: r.end_date,
-                            id: r.id
-                        };
-                    });
-                }
-
-                getCompanyProjects(companyId) {
-                    return this.projects.filter(p => p.company_id === companyId);
-                }
-
-                getCompanyEvents(companyId) {
-                    return this.events.filter(e => e.company_id === companyId).sort((a, b) => {
-                        if (!a.event_date) return 1;
-                        if (!b.event_date) return -1;
-                        return a.event_date.localeCompare(b.event_date);
-                    });
-                }
-
-                getPersonCareer(personId) {
-                    const roles = this.roles.filter(r => r.person_id === personId);
-                    return roles.map(r => {
-                        const company = this.companies.find(c => c.id === r.company_id);
-                        return {
-                            role_id: r.id,
-                            company_id: company?.id,
-                            company_name: company?.name,
-                            role_type: r.role_type,
-                            start_date: r.start_date,
-                            end_date: r.end_date,
-                            success_label: company?.success_label
-                        };
-                    });
-                }
-
-                getStatusClass(status) {
-                    if (!status) return '';
-                    if (status === 'success') return 'status-success';
-                    if (status === 'failure') return 'status-failure';
-                    if (status === 'ambivalent') return 'status-ambivalent';
-                    return '';
-                }
-            };
-        }
     </script>
 </body>
 </html>

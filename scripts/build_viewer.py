@@ -70,7 +70,7 @@ def build_html(data):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Junior-Mining DB — HTML Viewer</title>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <style>
         * {{
@@ -377,6 +377,217 @@ def build_html(data):
             }}
         }}
     </style>
+
+    <script>
+        // Define app function BEFORE Alpine initializes
+        function app() {{
+            return {{
+                activeTab: 'overview',
+                companies: [],
+                persons: [],
+                projects: [],
+                roles: [],
+                events: [],
+                selectedCompany: null,
+                selectedPerson: null,
+
+                filters: {{
+                    status: '',
+                    commodity: '',
+                    country: '',
+                    exitYear: null,
+                    personName: ''
+                }},
+
+                sortField: 'name',
+                sortDir: 'asc',
+                sortFieldPersons: 'companies_count',
+                sortDirPersons: 'desc',
+                minCompaniesForSerial: 2,
+
+                init() {{
+                    this.companies = db.companies;
+                    this.persons = db.persons;
+                    this.projects = db.projects;
+                    this.roles = db.roles;
+                    this.events = db.events;
+                }}
+
+                get filteredCompanies() {{
+                    let filtered = this.companies;
+
+                    if (this.filters.status) {{
+                        filtered = filtered.filter(c => c.success_label === this.filters.status);
+                    }}
+                    if (this.filters.commodity) {{
+                        filtered = filtered.filter(c =>
+                            (c.primary_commodity?.includes(this.filters.commodity)) ||
+                            (c.commodity_2?.includes(this.filters.commodity)) ||
+                            (c.commodity_3?.includes(this.filters.commodity))
+                        );
+                    }}
+                    if (this.filters.country) {{
+                        filtered = filtered.filter(c => c.country?.includes(this.filters.country));
+                    }}
+                    if (this.filters.exitYear) {{
+                        filtered = filtered.filter(c => c.exit_year === this.filters.exitYear);
+                    }}
+
+                    // Sort
+                    filtered.sort((a, b) => {{
+                        let aVal = a[this.sortField];
+                        let bVal = b[this.sortField];
+
+                        if (aVal == null) aVal = '';
+                        if (bVal == null) bVal = '';
+
+                        if (typeof aVal === 'string') {{
+                            aVal = aVal.toLowerCase();
+                            bVal = bVal.toLowerCase();
+                        }}
+
+                        if (aVal < bVal) return this.sortDir === 'asc' ? -1 : 1;
+                        if (aVal > bVal) return this.sortDir === 'asc' ? 1 : -1;
+                        return 0;
+                    }});
+
+                    return filtered;
+                }}
+
+                get filteredPersonsWithCounts() {{
+                    let filtered = this.persons.map(p => ({{
+                        ...p,
+                        companies_count: this.getCompanyPersons(p.id).length,
+                        companies_count_for_career: this.getPersonCareer(p.id).map(c => c.company_id)
+                    }}));
+
+                    if (this.filters.personName) {{
+                        filtered = filtered.filter(p =>
+                            p.nachname.toLowerCase().includes(this.filters.personName.toLowerCase())
+                        );
+                    }}
+
+                    // Sort
+                    filtered.sort((a, b) => {{
+                        let aVal = a[this.sortFieldPersons];
+                        let bVal = b[this.sortFieldPersons];
+
+                        if (aVal == null) aVal = '';
+                        if (bVal == null) bVal = '';
+
+                        if (typeof aVal === 'string') {{
+                            aVal = aVal.toLowerCase();
+                            bVal = bVal.toLowerCase();
+                        }}
+
+                        if (aVal < bVal) return this.sortDirPersons === 'asc' ? -1 : 1;
+                        if (aVal > bVal) return this.sortDirPersons === 'asc' ? 1 : -1;
+                        return 0;
+                    }});
+
+                    return filtered;
+                }}
+
+                get serialPersons() {{
+                    return this.filteredPersonsWithCounts
+                        .filter(p => {{
+                            const career = this.getPersonCareer(p.id);
+                            return career.length >= this.minCompaniesForSerial;
+                        }})
+                        .map(p => {{
+                            const career = this.getPersonCareer(p.id);
+                            const successCount = career.filter(c => c.success_label === 'success').length;
+                            const failureCount = career.filter(c => c.success_label === 'failure').length;
+                            return {{
+                                ...p,
+                                companies_count: career.length,
+                                success_count: successCount,
+                                failure_count: failureCount,
+                                success_rate: career.length > 0 ? successCount / career.length : 0
+                            }};
+                        }})
+                        .sort((a, b) => b.success_rate - a.success_rate);
+                }}
+
+                sort(field) {{
+                    if (this.sortField === field) {{
+                        this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+                    }} else {{
+                        this.sortField = field;
+                        this.sortDir = 'asc';
+                    }}
+                }}
+
+                sortPersons(field) {{
+                    if (this.sortFieldPersons === field) {{
+                        this.sortDirPersons = this.sortDirPersons === 'asc' ? 'desc' : 'asc';
+                    }} else {{
+                        this.sortFieldPersons = field;
+                        this.sortDirPersons = 'desc';
+                    }}
+                }}
+
+                selectCompany(id) {{
+                    this.selectedCompany = this.companies.find(c => c.id === id) || null;
+                    this.activeTab = 'detail';
+                }}
+
+                selectPerson(id) {{
+                    this.selectedPerson = this.persons.find(p => p.id === id) || null;
+                }}
+
+                getCompanyPersons(companyId) {{
+                    const roles = this.roles.filter(r => r.company_id === companyId);
+                    return roles.map(r => {{
+                        const person = this.persons.find(p => p.id === r.person_id);
+                        return {{
+                            ...person,
+                            role_type: r.role_type,
+                            start_date: r.start_date,
+                            end_date: r.end_date,
+                            id: r.id
+                        }};
+                    }});
+                }}
+
+                getCompanyProjects(companyId) {{
+                    return this.projects.filter(p => p.company_id === companyId);
+                }}
+
+                getCompanyEvents(companyId) {{
+                    return this.events.filter(e => e.company_id === companyId).sort((a, b) => {{
+                        if (!a.event_date) return 1;
+                        if (!b.event_date) return -1;
+                        return a.event_date.localeCompare(b.event_date);
+                    }});
+                }}
+
+                getPersonCareer(personId) {{
+                    const roles = this.roles.filter(r => r.person_id === personId);
+                    return roles.map(r => {{
+                        const company = this.companies.find(c => c.id === r.company_id);
+                        return {{
+                            role_id: r.id,
+                            company_id: company?.id,
+                            company_name: company?.name,
+                            role_type: r.role_type,
+                            start_date: r.start_date,
+                            end_date: r.end_date,
+                            success_label: company?.success_label
+                        }};
+                    }});
+                }}
+
+                getStatusClass(status) {{
+                    if (!status) return '';
+                    if (status === 'success') return 'status-success';
+                    if (status === 'failure') return 'status-failure';
+                    if (status === 'ambivalent') return 'status-ambivalent';
+                    return '';
+                }}
+            }};
+        }}
+    </script>
 </head>
 <body>
     <div x-data="app()" x-init="init()">
@@ -703,214 +914,6 @@ def build_html(data):
 
     <script>
         const db = {json_data};
-
-        function app() {{
-            return {{
-                activeTab: 'overview',
-                companies: [],
-                persons: [],
-                projects: [],
-                roles: [],
-                events: [],
-                selectedCompany: null,
-                selectedPerson: null,
-
-                filters: {{
-                    status: '',
-                    commodity: '',
-                    country: '',
-                    exitYear: null,
-                    personName: ''
-                }},
-
-                sortField: 'name',
-                sortDir: 'asc',
-                sortFieldPersons: 'companies_count',
-                sortDirPersons: 'desc',
-                minCompaniesForSerial: 2,
-
-                init() {{
-                    this.companies = db.companies;
-                    this.persons = db.persons;
-                    this.projects = db.projects;
-                    this.roles = db.roles;
-                    this.events = db.events;
-                }}
-
-                get filteredCompanies() {{
-                    let filtered = this.companies;
-
-                    if (this.filters.status) {{
-                        filtered = filtered.filter(c => c.success_label === this.filters.status);
-                    }}
-                    if (this.filters.commodity) {{
-                        filtered = filtered.filter(c =>
-                            (c.primary_commodity?.includes(this.filters.commodity)) ||
-                            (c.commodity_2?.includes(this.filters.commodity)) ||
-                            (c.commodity_3?.includes(this.filters.commodity))
-                        );
-                    }}
-                    if (this.filters.country) {{
-                        filtered = filtered.filter(c => c.country?.includes(this.filters.country));
-                    }}
-                    if (this.filters.exitYear) {{
-                        filtered = filtered.filter(c => c.exit_year === this.filters.exitYear);
-                    }}
-
-                    // Sort
-                    filtered.sort((a, b) => {{
-                        let aVal = a[this.sortField];
-                        let bVal = b[this.sortField];
-
-                        if (aVal == null) aVal = '';
-                        if (bVal == null) bVal = '';
-
-                        if (typeof aVal === 'string') {{
-                            aVal = aVal.toLowerCase();
-                            bVal = bVal.toLowerCase();
-                        }}
-
-                        if (aVal < bVal) return this.sortDir === 'asc' ? -1 : 1;
-                        if (aVal > bVal) return this.sortDir === 'asc' ? 1 : -1;
-                        return 0;
-                    }});
-
-                    return filtered;
-                }}
-
-                get filteredPersonsWithCounts() {{
-                    let filtered = this.persons.map(p => ({{
-                        ...p,
-                        companies_count: this.getCompanyPersons(p.id).length,
-                        companies_count_for_career: this.getPersonCareer(p.id).map(c => c.company_id)
-                    }}));
-
-                    if (this.filters.personName) {{
-                        filtered = filtered.filter(p =>
-                            p.nachname.toLowerCase().includes(this.filters.personName.toLowerCase())
-                        );
-                    }}
-
-                    // Sort
-                    filtered.sort((a, b) => {{
-                        let aVal = a[this.sortFieldPersons];
-                        let bVal = b[this.sortFieldPersons];
-
-                        if (aVal == null) aVal = '';
-                        if (bVal == null) bVal = '';
-
-                        if (typeof aVal === 'string') {{
-                            aVal = aVal.toLowerCase();
-                            bVal = bVal.toLowerCase();
-                        }}
-
-                        if (aVal < bVal) return this.sortDirPersons === 'asc' ? -1 : 1;
-                        if (aVal > bVal) return this.sortDirPersons === 'asc' ? 1 : -1;
-                        return 0;
-                    }});
-
-                    return filtered;
-                }}
-
-                get serialPersons() {{
-                    return this.filteredPersonsWithCounts
-                        .filter(p => {{
-                            const career = this.getPersonCareer(p.id);
-                            return career.length >= this.minCompaniesForSerial;
-                        }})
-                        .map(p => {{
-                            const career = this.getPersonCareer(p.id);
-                            const successCount = career.filter(c => c.success_label === 'success').length;
-                            const failureCount = career.filter(c => c.success_label === 'failure').length;
-                            return {{
-                                ...p,
-                                companies_count: career.length,
-                                success_count: successCount,
-                                failure_count: failureCount,
-                                success_rate: career.length > 0 ? successCount / career.length : 0
-                            }};
-                        }})
-                        .sort((a, b) => b.success_rate - a.success_rate);
-                }}
-
-                sort(field) {{
-                    if (this.sortField === field) {{
-                        this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
-                    }} else {{
-                        this.sortField = field;
-                        this.sortDir = 'asc';
-                    }}
-                }}
-
-                sortPersons(field) {{
-                    if (this.sortFieldPersons === field) {{
-                        this.sortDirPersons = this.sortDirPersons === 'asc' ? 'desc' : 'asc';
-                    }} else {{
-                        this.sortFieldPersons = field;
-                        this.sortDirPersons = 'desc';
-                    }}
-                }}
-
-                selectCompany(id) {{
-                    this.selectedCompany = this.companies.find(c => c.id === id) || null;
-                    this.activeTab = 'detail';
-                }}
-
-                selectPerson(id) {{
-                    this.selectedPerson = this.persons.find(p => p.id === id) || null;
-                }}
-
-                getCompanyPersons(companyId) {{
-                    const roles = this.roles.filter(r => r.company_id === companyId);
-                    return roles.map(r => {{
-                        const person = this.persons.find(p => p.id === r.person_id);
-                        return {{
-                            ...person,
-                            role_type: r.role_type,
-                            start_date: r.start_date,
-                            end_date: r.end_date,
-                            id: r.id
-                        }};
-                    }});
-                }}
-
-                getCompanyProjects(companyId) {{
-                    return this.projects.filter(p => p.company_id === companyId);
-                }}
-
-                getCompanyEvents(companyId) {{
-                    return this.events.filter(e => e.company_id === companyId).sort((a, b) => {{
-                        if (!a.event_date) return 1;
-                        if (!b.event_date) return -1;
-                        return a.event_date.localeCompare(b.event_date);
-                    }});
-                }}
-
-                getPersonCareer(personId) {{
-                    const roles = this.roles.filter(r => r.person_id === personId);
-                    return roles.map(r => {{
-                        const company = this.companies.find(c => c.id === r.company_id);
-                        return {{
-                            role_id: r.id,
-                            company_id: company?.id,
-                            company_name: company?.name,
-                            role_type: r.role_type,
-                            start_date: r.start_date,
-                            end_date: r.end_date,
-                            success_label: company?.success_label
-                        }};
-                    }});
-                }}
-
-                getStatusClass(status) {{
-                    if (!status) return '';
-                    if (status === 'success') return 'status-success';
-                    if (status === 'failure') return 'status-failure';
-                    if (status === 'ambivalent') return 'status-ambivalent';
-                    return '';
-                }}
-            }};
-        }}
     </script>
 </body>
 </html>
