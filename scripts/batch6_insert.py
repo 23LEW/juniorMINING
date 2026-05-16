@@ -11,7 +11,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).parent.parent
 DB_PATH = REPO_ROOT / "data" / "junior_mining.db"
-SQL_PATH = REPO_ROOT / "sql" / "260517 Batch 6 Clean.sql"
+SQL_PATH = REPO_ROOT / "sql" / "260517 Batch 6 Final.sql"
 
 def insert_batch6():
     """Insert Batch 6 data into database"""
